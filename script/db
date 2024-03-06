@@ -1,0 +1,9 @@
+#!/bin/bash
+
+source .env
+
+# Load the DATABASE_URL from the environment
+DATABASE_URL=${DATABASE_URL?"Environment variable DATABASE_URL is not set"}
+
+# Run sqlx migrations using the DATABASE_URL
+sqlx migrate run --database-url $DATABASE_URL
