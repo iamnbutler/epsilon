@@ -49,11 +49,16 @@ async fn main() -> Result<(), sqlx::Error> {
 
     let tasks = Tasks::all().await?;
 
-    println!("Today's date: {}", today.date);
-    println!("Today's ID: {}", today.id);
+    println!("Today's date: {}", today.date());
+    println!("Today's ID: {}", today.id());
 
     for task in tasks {
-        println!("Task Title: {} ({})", task.title(), task.completed());
+        println!(
+            "{}: Task Title: {} ({})",
+            task.id(),
+            task.title(),
+            task.completed()
+        );
     }
 
     Ok(())

@@ -4,8 +4,8 @@ use crate::AsyncAppContext;
 
 #[derive(sqlx::FromRow)]
 pub struct Day {
-    pub id: i32,
-    pub date: String,
+    id: i32,
+    date: String,
 }
 
 impl Day {
@@ -19,6 +19,14 @@ impl Day {
             .await?;
 
         Ok(day)
+    }
+
+    pub fn id(&self) -> i32 {
+        self.id
+    }
+
+    pub fn date(&self) -> &String {
+        &self.date
     }
 }
 
