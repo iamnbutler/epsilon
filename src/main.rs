@@ -47,6 +47,9 @@ async fn main() -> Result<(), sqlx::Error> {
     Task::new(&cx, "Do something".to_string()).await?;
     Task::new(&cx, "Do something else".to_string()).await?;
 
+    let task_2 = Task::get_by_id(2, &cx).await?;
+    task_2.set_completed(&cx).await?;
+
     let tasks = Tasks::all().await?;
 
     println!("Today's date: {}", today.date());

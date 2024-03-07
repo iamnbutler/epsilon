@@ -32,6 +32,16 @@ impl Task {
         self.completed
     }
 
+    pub async fn get_by_id(id: i32, cx: &AsyncAppContext) -> Result<Task, sqlx::Error> {
+        let task =
+            sqlx::query_as::<_, Task>("SELECT id, title, completed FROM tasks WHERE id = $1")
+                .bind(id)
+                .fetch_one(cx.db_pool())
+                .await?;
+
+        Ok(task)
+    }
+
     pub async fn set_completed(&self, cx: &AsyncAppContext) -> Result<(), sqlx::Error> {
         sqlx::query("UPDATE tasks SET completed = $1 WHERE id = $2")
             .bind(true)
