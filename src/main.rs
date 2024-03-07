@@ -4,9 +4,13 @@ use envy;
 use serde::Deserialize;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 
-use crate::days::Day;
+use crate::{
+    days::Day,
+    tasks::{Task, Tasks},
+};
 
 mod days;
+mod tasks;
 
 #[derive(Deserialize, Debug)]
 struct Config {
@@ -40,8 +44,17 @@ async fn main() -> Result<(), sqlx::Error> {
 
     let today = Day::new(&cx, Utc::now().date_naive()).await?;
 
+    Task::new(&cx, "Do something".to_string()).await?;
+    Task::new(&cx, "Do something else".to_string()).await?;
+
+    let tasks = Tasks::all().await?;
+
     println!("Today's date: {}", today.date);
     println!("Today's ID: {}", today.id);
+
+    for task in tasks {
+        println!("Task Title: {} ({})", task.title(), task.completed());
+    }
 
     Ok(())
 }
