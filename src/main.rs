@@ -44,8 +44,8 @@ async fn main() -> Result<(), sqlx::Error> {
 
     let today = Day::new(&cx, Utc::now().date_naive()).await?;
 
-    Task::new(&cx, "Do something".to_string()).await?;
-    Task::new(&cx, "Do something else".to_string()).await?;
+    Task::new(&cx, "Do something".to_string(), Some(today.id())).await?;
+    Task::new(&cx, "Do something else".to_string(), None).await?;
 
     let task_2 = Task::get_by_id(2, &cx).await?;
     task_2.set_completed(&cx).await?;
@@ -62,6 +62,12 @@ async fn main() -> Result<(), sqlx::Error> {
             task.title(),
             task.completed()
         );
+    }
+
+    let today_tasks = today.get_tasks(&cx).await?;
+
+    for task in today_tasks {
+        println!("Today's Task: {} ({})", task.title(), task.completed());
     }
 
     Ok(())

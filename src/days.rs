@@ -1,6 +1,6 @@
 use chrono::NaiveDate;
 
-use crate::AsyncAppContext;
+use crate::{tasks::Task, AsyncAppContext};
 
 #[derive(sqlx::FromRow)]
 pub struct Day {
@@ -27,6 +27,19 @@ impl Day {
 
     pub fn date(&self) -> &String {
         &self.date
+    }
+
+    pub async fn get_tasks(&self, cx: &AsyncAppContext) -> Result<Vec<Task>, sqlx::Error> {
+        let tasks = sqlx::query_as::<_, Task>(
+            "SELECT tasks.id, tasks.title, tasks.completed, tasks.day_id
+             FROM tasks
+             WHERE tasks.day_id = $1",
+        )
+        .bind(self.id)
+        .fetch_all(cx.db_pool())
+        .await?;
+
+        Ok(tasks)
     }
 }
 

@@ -8,12 +8,17 @@ pub struct Task {
 }
 
 impl Task {
-    pub async fn new(cx: &AsyncAppContext, title: String) -> Result<Task, sqlx::Error> {
+    pub async fn new(
+        cx: &AsyncAppContext,
+        title: String,
+        day_id: Option<i32>,
+    ) -> Result<Task, sqlx::Error> {
         let task = sqlx::query_as::<_, Task>(
-            "INSERT INTO tasks (title, completed) VALUES ($1, $2) RETURNING id, title, completed",
+            "INSERT INTO tasks (title, completed, day_id) VALUES ($1, $2, $3) RETURNING id, title, completed, day_id",
         )
         .bind(&title)
         .bind(false)
+        .bind(day_id)
         .fetch_one(cx.db_pool())
         .await?;
 
@@ -33,11 +38,12 @@ impl Task {
     }
 
     pub async fn get_by_id(id: i32, cx: &AsyncAppContext) -> Result<Task, sqlx::Error> {
-        let task =
-            sqlx::query_as::<_, Task>("SELECT id, title, completed FROM tasks WHERE id = $1")
-                .bind(id)
-                .fetch_one(cx.db_pool())
-                .await?;
+        let task = sqlx::query_as::<_, Task>(
+            "SELECT id, title, completed, day_id FROM tasks WHERE id = $1",
+        )
+        .bind(id)
+        .fetch_one(cx.db_pool())
+        .await?;
 
         Ok(task)
     }
