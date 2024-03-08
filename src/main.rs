@@ -5,12 +5,14 @@ use serde::Deserialize;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 
 use crate::{
+    completable::Completable,
     days::Day,
     repeatable::{RepeatFrequency, Repeatable},
-    rituals::Ritual,
+    rituals::{DayRitual, Ritual},
     tasks::Tasks,
 };
 
+mod completable;
 mod days;
 mod repeatable;
 mod rituals;
@@ -79,6 +81,17 @@ async fn main() -> Result<(), sqlx::Error> {
     ritual.update(&cx).await?;
 
     println!("Ritual: {} ({:?})", ritual.title(), ritual.frequency());
+
+    let mut day_ritual = DayRitual::new(&cx, today.id(), ritual.id()).await?;
+    day_ritual.set_completed(true);
+
+    let ritual_from_day = Ritual::get(&cx, ritual.id()).await?;
+
+    println!(
+        "Day Ritual: {} ({:?})",
+        ritual_from_day.title(),
+        ritual_from_day.frequency()
+    );
 
     Ok(())
 }
