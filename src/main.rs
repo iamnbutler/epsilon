@@ -6,10 +6,14 @@ use sqlx::{postgres::PgPoolOptions, PgPool};
 
 use crate::{
     days::Day,
-    tasks::{Task, Tasks},
+    repeatable::{RepeatFrequency, Repeatable},
+    rituals::Ritual,
+    tasks::Tasks,
 };
 
 mod days;
+mod repeatable;
+mod rituals;
 mod tasks;
 
 #[derive(Deserialize, Debug)]
@@ -44,11 +48,11 @@ async fn main() -> Result<(), sqlx::Error> {
 
     let today = Day::new(&cx, Utc::now().date_naive()).await?;
 
-    Task::new(&cx, "Do something".to_string(), Some(today.id())).await?;
-    Task::new(&cx, "Do something else".to_string(), None).await?;
+    // Task::new(&cx, "Do something".to_string(), Some(today.id())).await?;
+    // Task::new(&cx, "Do something else".to_string(), None).await?;
 
-    let task_2 = Task::get_by_id(2, &cx).await?;
-    task_2.set_completed(&cx).await?;
+    // let task_2 = Task::get_by_id(2, &cx).await?;
+    // task_2.set_completed(&cx).await?;
 
     let tasks = Tasks::all().await?;
 
@@ -69,6 +73,12 @@ async fn main() -> Result<(), sqlx::Error> {
     for task in today_tasks {
         println!("Today's Task: {} ({})", task.title(), task.completed());
     }
+
+    let mut ritual = Ritual::new(&cx, "Drink coffee".to_string()).await?;
+    ritual.set_frequency(Some(RepeatFrequency::Daily));
+    ritual.update(&cx).await?;
+
+    println!("Ritual: {} ({:?})", ritual.title(), ritual.frequency());
 
     Ok(())
 }
